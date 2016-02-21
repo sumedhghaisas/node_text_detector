@@ -1,0 +1,26 @@
+{
+  "name": "node-opencv",
+  "version": "0.0.1",
+  "description": "Scene Text Detector for Node.JS",
+  "author": {
+    "name": "Sumedh Ghaisas",
+    "email": "sumedhghaisas@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ttt"
+  },
+  "main": "",
+  "license": "",
+  "dependencies": {
+    "cmake-js": "3.0.0",
+    "nan": "^2.2.0",
+    "http": "latest",
+    "adm-zip":"latest",
+    "tar":"latest",
+    "bindings":"latest"
+  },
+  "scripts": {
+    "install": "node cmake_install.js"
+  }
+}

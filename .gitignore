@@ -1,0 +1,4 @@
+.hunter
+node_modules
+build
+cmake_binary
