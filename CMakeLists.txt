@@ -6,7 +6,7 @@ include("cmake/HunterGate.cmake")
 
 HunterGate(
     URL "https://github.com/sumedhghaisas/hunter/archive/for_node_opencv.tar.gz"
-    SHA1 "dc4c8bb231fa8946dcb353b3de4a39cb7542b104"
+    SHA1 "4b5d8683fd25a29ec6741f0ef2d5c8db7e0d7d4f"
 )
 
 project(node_text_detector)
