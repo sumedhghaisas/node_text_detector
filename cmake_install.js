@@ -1,65 +1,74 @@
 var AdmZip = require('adm-zip');
 var https = require('https');
 var fs = require('fs');
-var exec = require('child_process').exec, child;
+var tar = require('tar');
+var child_process = require('child_process');
 
 function onError(err) {
-  console.error('An error occurred:', err)
+    console.error('An error occurred:', err)
 }
 
-function onEnd() {
-  console.log('Extracted!')
+function runCmakeJS(cmakeJSFile, cmakeFile, slash)
+{
+    const ls = child_process.spawn(cmakeJSFile, ['-c', __dirname + slash + 'cmake_binary' + slash + 'bin' + slash + cmakeFile, 'rebuild']);
+                     
+    ls.on("exit", function(exitCode) {
+        console.log('process exited with code ' + exitCode);
+    });
+
+    ls.stdout.on("data", function(chunk) {
+        console.log('received stdout chunk ' + chunk);
+    });
+
+    ls.stderr.on("data", function(chunk) {
+        console.log('received stderr chunk ' + chunk);
+    });
+
+    ls.stdout.on("end", function() {
+        console.log("finished collecting data chunks from stdout");
+    });
 }
     
-var downloadAndRun = function(filename, type, folder, url) {
-			var tmpFilePath = filename + "." + type;
-			https.get(url, function(response) {
-		 		response.on('data', function (data) {
-		 			fs.appendFileSync(tmpFilePath, data)
-				});
-		 		response.on('end', function() {
-		 			 if(type == 'zip')
-                     {
-                        var zip = new AdmZip(tmpFilePath);
-                        zip.extractAllTo("./");
-                     }
-                     else if(type == "tar.gz")
-                     {
-                        var extractor = tar.Extract({path: "./"})
-                            .on('error', onError)
-                            .on('end', onEnd);
+function downloadAndRun(filename, type, folder, url) 
+{
+    var tmpFilePath = filename + "." + type;
+  
+    https.get(url, function(response) {
+        response.on('data', function (data) {
+            fs.appendFileSync(tmpFilePath, data)
+        });
 
-                        fs.createReadStream(tmpFilePath)
-                          .on('error', onError)
-                          .pipe(extractor);
-                     }
-                     else 
-                     {
-                         console.error("Error: Invalid Type");
-                     }
-		 			 fs.unlink(tmpFilePath);
-                     fs.renameSync('./' + folder, './cmake_binary');
-                     
-                     var current_dir = __dirname;
-                     
-                     var command = '';
-                     if(process.platform == 'win32')
-                         command = 'cmake-js -c ' + current_dir + '\\cmake_binary\\bin\\cmake.exe rebuild';
-                     else command = command = 'cmake-js -c ' + current_dir + '\\cmake_binary\\bin\\cmake rebuild';
-                     
-                     console.log("Running command: " + command);
-                     
-                     child = exec(command, function (error, stdout, stderr) {
-                                                                            console.log('stdout: ' + stdout);
-                                                                            console.log('stderr: ' + stderr);
-                                                                            if (error !== null) {
-                                                                                console.log('exec error: ' + error);
-                                                                            }
-                                                                        });
+        response.on('end', function() {
+            if(type == 'zip')
+            {
+                var zip = new AdmZip(tmpFilePath);
+                zip.extractAllTo("./");
+                fs.unlink(tmpFilePath);
+                fs.renameSync('./' + folder, './cmake_binary');
+                runCmakeJS('.\\node_modules\\.bin\\cmake-js.cmd', 'cmake.exe', '\\');
+            }
+            else if(type == "tar.gz")
+            {
+                var extractor = tar.Extract({path: "./"})
+                    .on('error', onError)
+                    .on('end', function() {
+                        fs.unlink(tmpFilePath);
+                        fs.renameSync('./' + folder, './cmake_binary');
+                        runCmakeJS('./node_modules/cmake-js/bin/cmake-js', 'cmake', '/');
+                    });
 
-			 	})
-		 	});
-		}
+                fs.createReadStream(tmpFilePath)
+                    .on('error', onError)
+                    .pipe(extractor);
+            }
+            else 
+            {
+                console.error("Error: Invalid Type");
+            }
+        });
+
+    })
+});
 
 var toDownload = false;        
 try
@@ -89,19 +98,10 @@ if (toDownload)
 else 
 {
     console.log("Cmake binaries already exists.");
-    var current_dir = __dirname;
-    var command = '';
-                     if(process.platform == 'win32')
-                         command = 'cmake-js -c ' + current_dir + '\\cmake_binary\\bin\\cmake.exe rebuild';
-                     else command = command = 'cmake-js -c ' + current_dir + '\\cmake_binary\\bin\\cmake rebuild';
-                     
-                     console.log("Running command: " + command);
-                     
-                     child = exec(command, function (error, stdout, stderr) {
-                                                                            console.log('stdout: ' + stdout);
-                                                                            console.log('stderr: ' + stderr);
-                                                                            if (error !== null) {
-                                                                                console.log('exec error: ' + error);
-                                                                            }
-                                                                        });
+    
+    if(process.platform == 'win32')
+    {
+        runCmakeJS('.\\node_modules\\.bin\\cmake-js.cmd', 'cmake.exe', '\\');
+    }
+    else runCmakeJS('./node_modules/cmake-js/bin/cmake-js', 'cmake', '/');
 }
