@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(HUNTER_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.hunter/")
-
 include("cmake/HunterGate.cmake")
 
 HunterGate(

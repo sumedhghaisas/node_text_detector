@@ -13,5 +13,5 @@ using namespace std;
 using namespace cv;
 using namespace cv::text;
 
-OutputOCR Ocr(std::string);
+OutputOCR Ocr(std::string, std::string);
 OutputOCR Ocr(std::string, Rect box);

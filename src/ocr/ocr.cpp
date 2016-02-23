@@ -44,7 +44,7 @@ class outputOCR{
     
 };
 
-OutputOCR Ocr(string path);
+OutputOCR Ocr(string path, string languageFile);
 outputOCR Ocr(string path,Rect box);
 
 Rect groups_draw(Mat &src, vector<Rect> &groups);
@@ -55,11 +55,11 @@ void er_draw(vector<Mat> &channels, vector<vector<ERStat> > &regions, vector<Vec
 
 vector<Rect> computeGroupsWithMinArea(Mat &src,vector<Mat> &channels,float minArea);
 
-vector<DecodedText> doOCR(Mat &image,vector<Mat> channels,vector<vector<ERStat> > regions,vector< vector<Vec2i> > nm_region_groups,vector<Rect> nm_boxes);
+vector<DecodedText> doOCR(string languageFile, Mat &image,vector<Mat> channels,vector<vector<ERStat> > regions,vector< vector<Vec2i> > nm_region_groups,vector<Rect> nm_boxes);
 
 Regions computeRegionGroups(Mat &src,vector<Mat> &channels,float minArea);
 
-OutputOCR detectAndDecode(Mat &src);
+OutputOCR detectAndDecode(string languageFile, Mat &src);
 
 
 outputOCR Ocr(string path,Rect box) {
@@ -104,14 +104,14 @@ outputOCR Ocr(string path,Rect box) {
     return output;
 }
 
-OutputOCR Ocr (string path) {
+OutputOCR Ocr (string path, string languageFile) {
     // namedWindow("grouping",WINDOW_NORMAL);
     Mat src = imread(path);
     cout << "image loaded" << endl;
-    return detectAndDecode(src);
+    return detectAndDecode(languageFile, src);
 }
 
-OutputOCR detectAndDecode(Mat &src){
+OutputOCR detectAndDecode(string languageFile, Mat &src){
     
     // Extract channels to be processed individually
     vector<Mat> channels;
@@ -138,7 +138,7 @@ OutputOCR detectAndDecode(Mat &src){
     // draw groups
    	Rect group_box= groups_draw(src, groups_boxes);
     imwrite("save.jpg",src);
-    vector<DecodedText> decodedTxt=doOCR(src,channels,region.regions,region.region_groups,groups_boxes);
+    vector<DecodedText> decodedTxt=doOCR(languageFile, src,channels,region.regions,region.region_groups,groups_boxes);
    
  
     OutputOCR output(Box(group_box.tl().x, group_box.br().x, group_box.tl().y, group_box.br().y), decodedTxt);
@@ -150,11 +150,12 @@ OutputOCR detectAndDecode(Mat &src){
     }
     return output;
 }
-vector<DecodedText> doOCR(Mat &image,vector<Mat> channels,vector<vector<ERStat> > regions,vector< vector<Vec2i> > nm_region_groups,vector<Rect> nm_boxes){
+vector<DecodedText> doOCR(string languageFile, Mat &image,vector<Mat> channels,vector<vector<ERStat> > regions,vector< vector<Vec2i> > nm_region_groups,vector<Rect> nm_boxes){
     // Text Recognition (OCR)
     double t_r = (double)getTickCount();
     
-    Ptr<OCRTesseract> ocr = OCRTesseract::create();
+    cout << languageFile << endl;
+    Ptr<OCRTesseract> ocr = OCRTesseract::create(languageFile.c_str());
     string output;
     Mat out_img;
     Mat out_img_detection;

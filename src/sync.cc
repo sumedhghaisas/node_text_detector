@@ -23,13 +23,15 @@ using Nan::Set;
 NAN_METHOD(GetTextSync) {
     // get the value of path
     v8::String::Utf8Value p(info[0]);
+    v8::String::Utf8Value p2(info[1]);
     string path = string(*p);
+    string languageFile = string(*p2);
     // if the second argument is passed, we use it
     if (info.Length() > 1){
         //detectRegions = To<bool>(info[1]).FromJust();
     }
     // call the decoder here
-    OutputOCR decodedText = Ocr(path);
+    OutputOCR decodedText = Ocr(path, languageFile);
     // set the return value
     info.GetReturnValue().Set(Nan::New(decodedText.ToLocal()));
 }
