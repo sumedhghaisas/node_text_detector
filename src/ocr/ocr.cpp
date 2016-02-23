@@ -209,8 +209,8 @@ vector<Rect> computeGroupsWithMinArea(Mat &src,vector<Mat> &channels,float minAr
 Regions computeRegionGroups(Mat &src,vector<Mat> &channels,float minArea){
     // Create ERFilter objects with the 1st and 2nd stage default classifiers
     //FIXME
-    Ptr<ERFilter> er_filter1 = createERFilterNM1(loadClassifierNM1("trained_classifierNM1.xml"),100,minArea,0.5f,0.8f,true,0.02f);
-    Ptr<ERFilter> er_filter2 = createERFilterNM2(loadClassifierNM2("trained_classifierNM2.xml"),0.01);
+    Ptr<ERFilter> er_filter1 = createERFilterNM1(loadClassifierNM1("Resources/trained_classifierNM1.xml"),100,minArea,0.5f,0.8f,true,0.02f);
+    Ptr<ERFilter> er_filter2 = createERFilterNM2(loadClassifierNM2("Resources/trained_classifierNM2.xml"),0.01);
     vector<vector<ERStat> > regions(channels.size());
     // Apply the default cascade classifier to each independent channel (could be done in parallel)
     for (int c=0; c<(int)channels.size(); c++)

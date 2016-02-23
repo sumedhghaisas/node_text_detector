@@ -49,17 +49,12 @@ function downloadAndRun(filename, type, folder, url)
             }
             else if(type == "tar.gz")
             {
-                var extractor = tar.Extract({path: "./"})
-                    .on('error', onError)
-                    .on('end', function() {
-                        fs.unlink(tmpFilePath);
-                        fs.renameSync('./' + folder, './cmake_binary');
-                        runCmakeJS('./node_modules/cmake-js/bin/cmake-js', 'cmake', '/');
-                    });
-
-                fs.createReadStream(tmpFilePath)
-                    .on('error', onError)
-                    .pipe(extractor);
+                const ls = child_process.spawn('tar', ['-xzf', tmpFilePath]);
+                ls.stdout.on("end", function() {
+                    fs.unlink(tmpFilePath);
+                    fs.renameSync('./' + folder, './cmake_binary');
+                    runCmakeJS('./node_modules/cmake-js/bin/cmake-js', 'cmake', '/');
+                });
             }
             else 
             {
@@ -68,7 +63,7 @@ function downloadAndRun(filename, type, folder, url)
         });
 
     })
-});
+};
 
 var toDownload = false;        
 try
