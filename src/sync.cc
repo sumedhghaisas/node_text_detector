@@ -18,14 +18,15 @@ using Nan::Null;
 using Nan::To;
 using Nan::GetFunction;
 using Nan::Set;
+using Nan::Utf8String;
 
 // Simple synchronous access to the `GetText()` function
 NAN_METHOD(GetTextSync) {
     // get the value of path
-    v8::String::Utf8Value p(info[0]);
-    v8::String::Utf8Value p2(info[1]);
-    string path = string(*p);
-    string languageFile = string(*p2);
+    Utf8String *utfPath = new Utf8String(info[0]);
+    Utf8String *utfLanguageFile = new Utf8String(info[1]);
+    string path(**utfPath);
+    string languageFile(**utfLanguageFile);
     // if the second argument is passed, we use it
     if (info.Length() > 1){
         //detectRegions = To<bool>(info[1]).FromJust();
