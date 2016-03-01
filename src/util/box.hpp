@@ -8,10 +8,10 @@ struct Box
   v8::Local<v8::Array> ToLocal()
   {
     v8::Local<v8::Array> array = Nan::New<v8::Array>();
-    Nan::Set(array, 0, v8::Integer::New(x1));
-	array->Set(1,v8::Integer::New(x2));
-	array->Set(2,v8::Integer::New(y1));
-	array->Set(3,v8::Integer::New(y2));
+    Nan::Set(array, 0, Nan::New<v8::Integer>(x1));
+	Nan::Set(array, 1, Nan::New<v8::Integer>(x2));
+	Nan::Set(array, 2, Nan::New<v8::Integer>(y1));
+	Nan::Set(array, 3, Nan::New<v8::Integer>(y2));
 	return array;
   }
   Box() {
