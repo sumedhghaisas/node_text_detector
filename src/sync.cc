@@ -32,9 +32,11 @@ NAN_METHOD(GetTextSync) {
         //detectRegions = To<bool>(info[1]).FromJust();
     }
     // call the decoder here
-    OutputOCR decodedText = Ocr(path, languageFile);
-    // set the return value
-    info.GetReturnValue().Set(Nan::New(decodedText.ToLocal()));
+    OutputOCR* decodedText = Ocr(path, languageFile);
+    if(decodedText == NULL)
+        info.GetReturnValue().Set(Nan::New<v8::Object>());
+    else info.GetReturnValue().Set(Nan::New(decodedText->ToLocal()));
+    delete decodedText;
 }
 
 NAN_MODULE_INIT(Init)

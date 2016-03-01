@@ -7,6 +7,10 @@
  *     Author: Lluis Gomez i Bigorda <lgomez AT cvc.uab.es>
  */
 
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <iterator>
 #include  "opencv2/text.hpp"
 #include  "opencv2/highgui.hpp"
 #include  "opencv2/imgproc.hpp"
@@ -22,6 +26,14 @@
 using namespace std;
 using namespace cv;
 using namespace cv::text;
+
+stringstream nullout;
+
+#if defined DEBUG 
+#define LOG cout
+#else
+#define LOG nullout
+#endif
 
 class Regions{
     public:
@@ -43,9 +55,6 @@ class outputOCR{
         vector<decodedTxtRegion> decodedText;
     
 };
-
-OutputOCR Ocr(string path, string languageFile);
-outputOCR Ocr(string path,Rect box);
 
 Rect groups_draw(Mat &src, vector<Rect> &groups);
 
@@ -87,7 +96,7 @@ outputOCR Ocr(string path,Rect box) {
     string op;
     Ptr<OCRTesseract> ocr = OCRTesseract::create();
     ocr->run(croppedImage, op, &boxes, &words, &confidences, OCR_LEVEL_WORD);
-    cout << "OCR output = " << op <<  " length = " << op.size() << endl;
+    LOG << "OCR output = " << op <<  " length = " << op.size() << endl;
     vector<decodedTxtRegion> decodedTxtRegions;
 
     decodedTxtRegion decodedTxt;
@@ -104,11 +113,52 @@ outputOCR Ocr(string path,Rect box) {
     return output;
 }
 
-OutputOCR Ocr (string path, string languageFile) {
+OutputOCR* Ocr(char* buffer, unsigned int len, string languageFile)
+{
+    Mat temp(1, len, CV_8UC3, buffer);
+    Mat src = imdecode(temp, 1);
+    if ( src.data == NULL )   
+    {
+        LOG << "Unable to load image." << endl;
+        return NULL;
+    }
+    return new OutputOCR(detectAndDecode(languageFile, src));
+}
+
+OutputOCR* Ocr (string path, string languageFile) {
     // namedWindow("grouping",WINDOW_NORMAL);
-    Mat src = imread(path);
-    cout << "image loaded" << endl;
-    return detectAndDecode(languageFile, src);
+    //Mat src = imread(path);
+    char* buffer = NULL;
+    unsigned int len = 0;
+    ifstream f;     
+    f.open(path.c_str(), std::ios::binary);
+    if(!f.is_open())  
+    {
+        LOG << "lol" << endl;
+    }  
+    else  
+    { 
+        f.seekg(0, std::ios::end);
+        len = f.tellg(); 
+        f.seekg(0, std::ios::beg);
+
+        buffer = new char[len];    
+        f.read(buffer, len);            
+
+        f.close();
+    }
+    
+    Mat temp(1, len, CV_8UC3, buffer);
+    Mat src = imdecode(temp, 1);
+    if ( src.data == NULL )   
+    {
+        LOG << "Unable to decode image." << endl;
+        return NULL;
+    }
+    LOG << src.type() << endl;
+    LOG << CV_8UC3 << endl;
+    LOG << "image loaded" << endl;
+    return new OutputOCR(detectAndDecode(languageFile, src));
 }
 
 OutputOCR detectAndDecode(string languageFile, Mat &src){
@@ -133,7 +183,7 @@ OutputOCR detectAndDecode(string languageFile, Mat &src){
     if(groups_boxes.size()==0){
         groups_boxes=computeGroupsWithMinArea(src,channels,minArea);
     }
-    cout<<"received boxes: "<<groups_boxes.size()<<endl;
+    LOG <<"received boxes: "<<groups_boxes.size()<<endl;
     
     // draw groups
    	Rect group_box= groups_draw(src, groups_boxes);
@@ -153,8 +203,7 @@ OutputOCR detectAndDecode(string languageFile, Mat &src){
 vector<DecodedText> doOCR(string languageFile, Mat &image,vector<Mat> channels,vector<vector<ERStat> > regions,vector< vector<Vec2i> > nm_region_groups,vector<Rect> nm_boxes){
     // Text Recognition (OCR)
     double t_r = (double)getTickCount();
-    
-    cout << languageFile << endl;
+   
     Ptr<OCRTesseract> ocr = OCRTesseract::create(languageFile.c_str());
     string output;
     Mat out_img;
@@ -180,7 +229,6 @@ vector<DecodedText> doOCR(string languageFile, Mat &image,vector<Mat> channels,v
         //image(nm_boxes[i]).copyTo(group_img);
         group_img(nm_boxes[i]).copyTo(group_img);
         
-
         copyMakeBorder(group_img,group_img,15,15,15,15,BORDER_CONSTANT,Scalar(0));
         
         vector<Rect>   boxes;
@@ -189,7 +237,8 @@ vector<DecodedText> doOCR(string languageFile, Mat &image,vector<Mat> channels,v
         ocr->run(group_img, output, &boxes, &words, &confidences, OCR_LEVEL_WORD);
         
         output.erase(remove(output.begin(), output.end(), '\n'), output.end());
-        cout << "OCR output = \"" << output << "\" length = " << output.size() << endl;
+        LOG << "OCR output = \"" << output << "\" length = " << output.size() << endl;
+        
         decodedTxtRegions.push_back(DecodedText(Box(nm_boxes[i].tl().x, nm_boxes[i].br().x, nm_boxes[i].tl().y, nm_boxes[i].br().y), words, confidences));
     }  
     return decodedTxtRegions;

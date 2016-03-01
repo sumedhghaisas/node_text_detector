@@ -10,33 +10,35 @@
 
 struct DecodedText
 {
-  DecodedText(Box box, std::vector<std::string> words, std::vector<float> confs)
-    : box(box), words(words), confs(confs) {}
-  Box box;
-  std::vector<std::string> words;
-  std::vector<float> confs;
-  v8::Local<v8::Object> object;
+    DecodedText(Box box, std::vector<std::string> words, std::vector<float> confs)
+        : box(box), words(words), confs(confs) {}
+    
+    Box box;
+    std::vector<std::string> words;
+    std::vector<float> confs;
+    v8::Local<v8::Object> object;
 
-  v8::Local<v8::Object> ToLocal()
-  {
-    v8::Isolate* isolate = NULL;
-    v8::Local<v8::Array> l_box = box.ToLocal();
-    v8::Local<v8::Array> l_words = v8::Array::New(words.size());
-    v8::Local<v8::Array> l_confs = v8::Array::New(confs.size());
+    v8::Local<v8::Object> ToLocal()
+    {
+        v8::Local<v8::Array> l_box = box.ToLocal();
+        v8::Local<v8::Array> l_words = Nan::New<v8::Array>();
+        v8::Local<v8::Array> l_confs = Nan::New<v8::Array>();
 
-    for(int i=0;i<words.size();i++){
-      l_words->Set(i,Nan::New(words[i]).ToLocalChecked());
-    }
-
-    for(int i=0;i<confs.size();i++){
-          l_confs->Set(i,v8::NumberObject::New(confs[i]));
+        for(int i = 0;i < words.size();i++)
+        {
+            Nan::Set(l_words, i, Nan::New(words[i]).ToLocalChecked());
         }
-	v8::Local<v8::Object> out = v8::Object::New();
-    out->Set(Nan::New("box").ToLocalChecked(), l_box);
-	out->Set(Nan::New("words").ToLocalChecked(), l_words);
-      out->Set(Nan::New("confidences").ToLocalChecked(), l_confs);
-    return out;
-  }
-  
+
+        for(int i=0;i<confs.size();i++)
+        {
+            Nan::Set(l_confs, i, Nan::New(confs[i]));
+        }
+        
+        v8::Local<v8::Object> out = Nan::New<v8::Object>();
+        Nan::Set(out, Nan::New("box").ToLocalChecked(), l_box);
+        Nan::Set(out, Nan::New("words").ToLocalChecked(), l_words);
+        Nan::Set(out, Nan::New("confidences").ToLocalChecked(), l_confs);
+        return out;
+    }
 };
 #endif

@@ -21,6 +21,7 @@
     "bindings":"latest"
   },
   "scripts": {
-    "install": "node cmake_install.js"
+    "install": "node cmake_install.js",
+    "test"   : "node example.js" 
   }
 }

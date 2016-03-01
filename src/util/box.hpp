@@ -7,9 +7,8 @@ struct Box
 {
   v8::Local<v8::Array> ToLocal()
   {
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
-    v8::Local<v8::Array> array = v8::Array::New(4);
-    array->Set(0,v8::Integer::New(x1));
+    v8::Local<v8::Array> array = Nan::New<v8::Array>();
+    Nan::Set(array, 0, v8::Integer::New(x1));
 	array->Set(1,v8::Integer::New(x2));
 	array->Set(2,v8::Integer::New(y1));
 	array->Set(3,v8::Integer::New(y2));
