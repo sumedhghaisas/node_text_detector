@@ -1,5 +1,5 @@
 {
-  "name": "node-opencv",
+  "name": "node_text_detector",
   "version": "0.0.1",
   "description": "Scene Text Detector for Node.JS",
   "author": {
@@ -8,10 +8,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "ttt"
+    "url": "https://github.com/sumedhghaisas/node_text_detector"
   },
   "main": "",
-  "license": "",
+  "license": "GNU GENERAL PUBLIC LICENSE",
   "dependencies": {
     "cmake-js": "3.0.0",
     "nan": "^2.2.0",
