@@ -46,7 +46,7 @@ function downloadAndRun(filename, type, folder, url)
             {
                 var zip = new AdmZip(tmpFilePath);
                 zip.extractAllTo("./");
-                //fs.unlink(tmpFilePath);
+                fs.unlink(tmpFilePath);
                 fs.renameSync('./' + folder, './cmake_binary');
                 runCmakeJS('cmake-js', 'cmake.exe', '\\');
             }

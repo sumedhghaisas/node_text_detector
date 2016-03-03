@@ -60,4 +60,4 @@ NAN_MODULE_INIT(Init)
     GetFunction(New<FunctionTemplate>(GetTextSync)).ToLocalChecked());
 }
 
-NODE_MODULE(node_text_detector, Init)
+NODE_MODULE(scene_text_detector, Init)

@@ -1,5 +1,5 @@
 'use strict';
-var sceneText = require('bindings')('node_text_detector');
+var sceneText = require('bindings')('scene_text_detector');
 var util = require('util');
 var fs = require('fs');
 var result;

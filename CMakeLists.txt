@@ -7,7 +7,7 @@ HunterGate(
     SHA1 "9a57b227303abe1faf67b2f7c78edb346f58899b"
 )
 
-project(node_text_detector)
+project(scene_text_detector)
 
 hunter_add_package(tesseract)
 hunter_add_package(PNG)
