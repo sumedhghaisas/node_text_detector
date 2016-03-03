@@ -1,6 +1,6 @@
 {
   "name": "node_text_detector",
-  "version": "v0.1.0",
+  "version": "v0.1.1",
   "description": "Scene Text Detector for Node.JS",
   "author": {
     "name": "Sumedh Ghaisas",
