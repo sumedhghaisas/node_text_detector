@@ -3,6 +3,7 @@ var https = require('https');
 var fs = require('fs');
 var tar = require('tar');
 var child_process = require('child_process');
+var http = require('http');
 
 function onError(err) {
     console.error('An error occurred:', err)
@@ -33,6 +34,8 @@ function downloadAndRun(filename, type, folder, url)
 {
     var tmpFilePath = filename + "." + type;
   
+    console.log(url);
+  
     https.get(url, function(response) {
         response.on('data', function (data) {
             fs.appendFileSync(tmpFilePath, data)
@@ -43,9 +46,9 @@ function downloadAndRun(filename, type, folder, url)
             {
                 var zip = new AdmZip(tmpFilePath);
                 zip.extractAllTo("./");
-                fs.unlink(tmpFilePath);
+                //fs.unlink(tmpFilePath);
                 fs.renameSync('./' + folder, './cmake_binary');
-                runCmakeJS('.\\node_modules\\.bin\\cmake-js.cmd', 'cmake.exe', '\\');
+                runCmakeJS('cmake-js', 'cmake.exe', '\\');
             }
             else if(type == "tar.gz")
             {
@@ -53,7 +56,7 @@ function downloadAndRun(filename, type, folder, url)
                 ls.stdout.on("end", function() {
                     fs.unlink(tmpFilePath);
                     fs.renameSync('./' + folder, './cmake_binary');
-                    runCmakeJS('./node_modules/cmake-js/bin/cmake-js', 'cmake', '/');
+                    runCmakeJS('cmake-js', 'cmake', '/');
                 });
             }
             else 

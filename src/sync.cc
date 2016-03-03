@@ -22,20 +22,35 @@ using Nan::Utf8String;
 
 // Simple synchronous access to the `GetText()` function
 NAN_METHOD(GetTextSync) {
-    // get the value of path
-    Utf8String *utfPath = new Utf8String(info[0]);
-    Utf8String *utfLanguageFile = new Utf8String(info[1]);
-    string path(**utfPath);
-    string languageFile(**utfLanguageFile);
-    // if the second argument is passed, we use it
-    if (info.Length() > 1){
-        //detectRegions = To<bool>(info[1]).FromJust();
+    OutputOCR* decodedText = NULL;
+    if(!node::Buffer::HasInstance(info[0]))
+    {
+        // get the value of path
+        Utf8String *utfPath = new Utf8String(info[0]);
+        Utf8String *utfLanguageFile = new Utf8String(info[1]);
+        Utf8String *utfWhitelist = new Utf8String(info[2]);
+        string path(**utfPath);
+        string languageFile(**utfLanguageFile);
+        string whitelist(**utfWhitelist);
+        
+        decodedText = Ocr(path, languageFile, whitelist);
     }
-    // call the decoder here
-    OutputOCR* decodedText = Ocr(path, languageFile);
+    else
+    {
+        char* image = (char*)node::Buffer::Data(info[0]->ToObject());
+        unsigned int len = node::Buffer::Length(info[0]->ToObject());
+        Utf8String *utfLanguageFile = new Utf8String(info[1]);
+        Utf8String *utfWhitelist = new Utf8String(info[2]);
+        string languageFile(**utfLanguageFile);
+        string whitelist(**utfWhitelist);
+        
+        decodedText = Ocr(image, len, languageFile, whitelist);
+    }
+   
     if(decodedText == NULL)
-        info.GetReturnValue().Set(Nan::New<v8::Object>());
+        info.GetReturnValue().Set(Nan::Undefined());
     else info.GetReturnValue().Set(Nan::New(decodedText->ToLocal()));
+    
     delete decodedText;
 }
 
