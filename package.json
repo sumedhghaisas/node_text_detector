@@ -1,6 +1,6 @@
 {
   "name": "node_text_detector",
-  "version": "v0.1.1",
+  "version": "0.1.1",
   "description": "Scene Text Detector for Node.JS",
   "author": {
     "name": "Sumedh Ghaisas",
@@ -16,12 +16,12 @@
     "cmake-js": "3.0.0",
     "nan": "^2.2.0",
     "http": "latest",
-    "adm-zip":"latest",
-    "tar":"latest",
-    "bindings":"latest"
+    "adm-zip": "latest",
+    "tar": "latest",
+    "bindings": "latest"
   },
   "scripts": {
     "install": "npm install -g cmake-js && node cmake_install.js",
-    "test"   : "node example.js" 
+    "test": "node example.js"
   }
 }
