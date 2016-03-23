@@ -1,6 +1,6 @@
 {
   "name": "scene-text-detector",
-  "version": "v0.1.0",
+  "version": "0.1.4",
   "description": "Scene Text Detector for Node.JS",
   "author": {
     "name": "Sumedh Ghaisas",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sumedhghaisas/node_text_detector"
+    "url": "git+https://github.com/sumedhghaisas/node_text_detector.git"
   },
   "main": "",
   "license": "GNU GENERAL PUBLIC LICENSE",
@@ -21,7 +21,17 @@
     "bindings": "latest"
   },
   "scripts": {
-    "install": "npm install -g cmake-js && node cmake_install.js",
+    "install": "npm install -g cmake-js@3.0.0 && node cmake_install.js",
     "test": "node example.js"
-  }
+  },
+  "readme": "# node_text_detector\r\nImage Text Detector written in C++(OpenCV with Tesseract) available as Node Addon.\r\n",
+  "readmeFilename": "README.md",
+  "gitHead": "5718ec50e179304f2b7088896e1a8b99685598f5",
+  "bugs": {
+    "url": "https://github.com/sumedhghaisas/node_text_detector/issues"
+  },
+  "homepage": "https://github.com/sumedhghaisas/node_text_detector#readme",
+  "_id": "scene-text-detector@0.1.4",
+  "_shasum": "6a00dfe049ac747641e1415bf40de50ed85a4962",
+  "_from": "scene-text-detector@*"
 }

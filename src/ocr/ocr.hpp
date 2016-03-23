@@ -15,3 +15,4 @@ using namespace cv::text;
 
 OutputOCR* Ocr(std::string imageFile, std::string languageFile, std::string whitelist);
 OutputOCR* Ocr(char* image, unsigned int len, std::string languageFile, std::string whitelist);
+OutputOCR* Ocr(char* image, unsigned int len, std::string languageFile, std::string whitelist, int x, int y, int width, int height, int rotate);

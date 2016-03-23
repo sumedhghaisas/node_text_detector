@@ -11,7 +11,7 @@ function onError(err) {
 
 function runCmakeJS(cmakeJSFile, cmakeFile, slash)
 {
-    const ls = child_process.spawn(cmakeJSFile, ['-c', __dirname + slash + 'cmake_binary' + slash + 'bin' + slash + cmakeFile, 'rebuild']);
+    const ls = child_process.spawn("cmd", ['/c', cmakeJSFile, '-c', __dirname + slash + 'cmake_binary' + slash + 'bin' + slash + cmakeFile, 'rebuild']);
                      
     ls.on("exit", function(exitCode) {
         console.log('process exited with code ' + exitCode);

@@ -54,10 +54,50 @@ NAN_METHOD(GetTextSync) {
     delete decodedText;
 }
 
+NAN_METHOD(GetTextCropSync) {
+    OutputOCR* decodedText = NULL;
+    if(!node::Buffer::HasInstance(info[0]))
+    {
+        // get the value of path
+        Utf8String *utfPath = new Utf8String(info[0]);
+        Utf8String *utfLanguageFile = new Utf8String(info[1]);
+        Utf8String *utfWhitelist = new Utf8String(info[2]);
+        string path(**utfPath);
+        string languageFile(**utfLanguageFile);
+        string whitelist(**utfWhitelist);
+        
+        decodedText = Ocr(path, languageFile, whitelist);
+    }
+    else
+    {
+        char* image = (char*)node::Buffer::Data(info[0]->ToObject());
+        unsigned int len = node::Buffer::Length(info[0]->ToObject());
+        Utf8String *utfLanguageFile = new Utf8String(info[1]);
+        Utf8String *utfWhitelist = new Utf8String(info[2]);
+        string languageFile(**utfLanguageFile);
+        string whitelist(**utfWhitelist);
+        int x = info[3]->Uint32Value();
+        int y = info[4]->Uint32Value();
+        int width = info[5]->Uint32Value();
+        int height = info[6]->Uint32Value();
+        int rotate = info[7]->Uint32Value();
+        
+        decodedText = Ocr(image, len, languageFile, whitelist, x, y, width, height, rotate);
+    }
+   
+    if(decodedText == NULL)
+        info.GetReturnValue().Set(Nan::Undefined());
+    else info.GetReturnValue().Set(Nan::New(decodedText->ToLocal()));
+    
+    delete decodedText;
+}
+
 NAN_MODULE_INIT(Init)
 {
    Set(target, Nan::New<v8::String>("GetTextSync").ToLocalChecked(),
     GetFunction(New<FunctionTemplate>(GetTextSync)).ToLocalChecked());
+   Set(target, Nan::New<v8::String>("GetTextCropSync").ToLocalChecked(),
+    GetFunction(New<FunctionTemplate>(GetTextCropSync)).ToLocalChecked());
 }
 
 NODE_MODULE(scene_text_detector, Init)

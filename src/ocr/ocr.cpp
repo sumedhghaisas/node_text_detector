@@ -48,56 +48,75 @@ void er_show(vector<Mat> &channels, vector<vector<ERStat> > &regions);
 
 void er_draw(vector<Mat> &channels, vector<vector<ERStat> > &regions, vector<Vec2i> group, Mat& segmentation);
 
-vector<Rect> computeGroupsWithMinArea(Mat &src,vector<Mat> &channels,float minArea);
+vector<Rect> computeGroupsWithMinArea(String langaugeFile, Mat &src,vector<Mat> &channels,float minArea);
 
 vector<DecodedText> doOCR(string languageFile, string whitelist, Mat &image,vector<Mat> channels,vector<vector<ERStat> > regions,vector< vector<Vec2i> > nm_region_groups,vector<Rect> nm_boxes);
 
-Regions computeRegionGroups(Mat &src,vector<Mat> &channels,float minArea);
+Regions computeRegionGroups(String langaugeFile, Mat &src,vector<Mat> &channels,float minArea);
 
-OutputOCR detectAndDecode(string languageFile, string whitelist, Mat &src);
+OutputOCR* detectAndDecode(string languageFile, string whitelist, Mat &src);
 
-/*
-OutputOCR Ocr(string path,Rect box) {
-    // namedWindow("grouping",WINDOW_NORMAL);
-    // read the image
-    Mat src = imread(path);
+void rotate_image_90n(Mat &src, Mat &dst, int angle)
+{
+    /*
+   if(src.data != dst.data){
+       src.copyTo(dst);
+   }
+
+   angle = ((angle / 90) % 4) * 90;
+
+   //0 : flip vertical; 1 flip horizontal
+   bool const flip_horizontal_or_vertical = angle > 0 ? 1 : 0;
+   int const number = abs(angle / 90);          
+
+   for(int i = 0; i != number; ++i){
+       transpose(dst, dst);
+       flip(dst, dst, flip_horizontal_or_vertical);
+   }*/
+   dst.create(src.size(), src.type());
+    if(angle == 270 || angle == -90){
+        // Rotate clockwise 270 degrees
+        cv::transpose(src, dst);
+        cv::flip(dst, dst, 0);
+    }else if(angle == 180 || angle == -180){
+        // Rotate clockwise 180 degrees
+        cv::flip(src, dst, -1);
+    }else if(angle == 90 || angle == -270){
+        // Rotate clockwise 90 degrees
+        cv::transpose(src, dst);
+        cv::flip(dst, dst, 1);
+    }else if(angle == 360 || angle == 0){
+        if(src.data != dst.data){
+            src.copyTo(dst);
+        }
+    }
+}
+
+OutputOCR* Ocr(char* buffer, unsigned int len, string languageFile, string whitelist, int x, int y, int width, int height, int rotate) {
+    cout << "Crop dimensions: " << x << " " << y << " " << width << " " << height << endl;
+    Mat temp(1, len, CV_8UC3, buffer);
+    Mat src = imdecode(temp, 1);
+    if ( src.data == NULL )   
+    {
+        cout << "Unable to load image." << endl;
+        return NULL;
+    }
     // clone the image
-    Mat clonesrc = src.clone();
+    if(rotate < 0)
+        rotate = 360 + rotate;
+    cout << "rotating image by " << rotate << endl;
+    Mat clonesrc;
+    Mat croppedImage = src(Rect(x, y, width, height));
+    rotate_image_90n(croppedImage, clonesrc, rotate);
+    //rotate_image_90n(src, clonesrc, 90);
+    //rotate_image_90n(clonesrc, clonesrc2, 90);
+    //rotate_image_90n(clonesrc2, src, 90);
+    //rotate_image_90n(src, clonesrc, 90);
     // crop the image
-    Mat croppedImage = clonesrc(Rect(box.tl().x, box.tl().y, (box.br().x - box.tl().x), (box.br().y - box.tl().y)));
-    // convert image to gray
-    cvtColor(croppedImage, croppedImage, COLOR_RGB2GRAY);
     
-    Mat dst = Mat::zeros(croppedImage.rows+2, croppedImage.cols+2, CV_8UC1);
-    
-    int thresh= (croppedImage.rows * 2)/10 + 1;
-    // do adaptive threshholding
-    adaptiveThreshold(croppedImage, croppedImage, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY,thresh , -10);
-    // imwrite("/Users/prjha/Documents/git/pranavjha/_scene-text-detector/samples/_3.jpg",src);
-    vector<Rect>   boxes;
-    vector<string> words;
-    vector<float>  confidences;
-    
-    // run ocr
-    string op;
-    Ptr<OCRTesseract> ocr = OCRTesseract::create();
-    ocr->run(croppedImage, op, &boxes, &words, &confidences, OCR_LEVEL_WORD);
-    LOG << "OCR output = " << op <<  " length = " << op.size() << endl;
-    vector<decodedTxtRegion> decodedTxtRegions;
-
-    decodedTxtRegion decodedTxt;
-    decodedTxt.x1 = box.tl().x;
-    decodedTxt.x2 = box.br().x;
-    decodedTxt.y1 = box.tl().y;
-    decodedTxt.y2 = box.br().y;
-    
-    decodedTxt.words = words;
-    decodedTxt.confidences = confidences;
-    decodedTxtRegions.push_back(decodedTxt);
-    outputOCR output;
-    output.decodedText=decodedTxtRegions;
-    return output;
-}*/
+    //imwrite("C:/save.jpg", clonesrc);
+    return detectAndDecode(languageFile, whitelist, clonesrc);
+}
 
 OutputOCR* Ocr(char* buffer, unsigned int len, string languageFile, string whitelist)
 {
@@ -105,10 +124,10 @@ OutputOCR* Ocr(char* buffer, unsigned int len, string languageFile, string white
     Mat src = imdecode(temp, 1);
     if ( src.data == NULL )   
     {
-        LOG << "Unable to load image." << endl;
+        cout << "Unable to load image." << endl;
         return NULL;
     }
-    return new OutputOCR(detectAndDecode(languageFile, whitelist, src));
+    return detectAndDecode(languageFile, whitelist, src);
 }
 
 OutputOCR* Ocr (string path, string languageFile, string whitelist) {
@@ -120,7 +139,7 @@ OutputOCR* Ocr (string path, string languageFile, string whitelist) {
     f.open(path.c_str(), std::ios::binary);
     if(!f.is_open())  
     {
-        LOG << "lol" << endl;
+        cout << "lol" << endl;
     }  
     else  
     { 
@@ -138,16 +157,16 @@ OutputOCR* Ocr (string path, string languageFile, string whitelist) {
     Mat src = imdecode(temp, 1);
     if ( src.data == NULL )   
     {
-        LOG << "Unable to decode image." << endl;
+        cout << "Unable to decode image." << endl;
         return NULL;
     }
-    LOG << src.type() << endl;
-    LOG << CV_8UC3 << endl;
-    LOG << "image loaded" << endl;
-    return new OutputOCR(detectAndDecode(languageFile, whitelist, src));
+    cout << src.type() << endl;
+    cout << CV_8UC3 << endl;
+    cout << "image loaded" << endl;
+    return detectAndDecode(languageFile, whitelist, src);
 }
 
-OutputOCR detectAndDecode(string languageFile, string whitelist, Mat &src){
+OutputOCR* detectAndDecode(string languageFile, string whitelist, Mat &src){
     
     // Extract channels to be processed individually
     vector<Mat> channels;
@@ -164,20 +183,23 @@ OutputOCR detectAndDecode(string languageFile, string whitelist, Mat &src){
     }
     
     vector<Rect> groups_boxes;
-    Regions region=computeRegionGroups(src,channels,minArea);
+    Regions region=computeRegionGroups(languageFile, src,channels,minArea);
     groups_boxes=region.groups_boxes;
     if(groups_boxes.size()==0){
-        groups_boxes=computeGroupsWithMinArea(src,channels,minArea);
+        groups_boxes=computeGroupsWithMinArea(languageFile, src,channels,minArea);
     }
-    LOG <<"received boxes: "<<groups_boxes.size()<<endl;
+    cout << "received boxes: " << groups_boxes.size() << endl;
+    
+    if(groups_boxes.size() == 0)
+        return NULL;
     
     // draw groups
-   	Rect group_box= groups_draw(src, groups_boxes);
-    imwrite("save.jpg",src);
-    vector<DecodedText> decodedTxt=doOCR(languageFile, whitelist, src,channels,region.regions,region.region_groups,groups_boxes);
+   	Rect group_box = groups_draw(src, groups_boxes);
+    //imwrite("save.jpg",src);
+    vector<DecodedText> decodedTxt = doOCR(languageFile, whitelist, src,channels, region.regions, region.region_groups, groups_boxes);
    
  
-    OutputOCR output(Box(group_box.tl().x, group_box.br().x, group_box.tl().y, group_box.br().y), decodedTxt);
+    OutputOCR *output = new OutputOCR(Box(group_box.tl().x, group_box.br().x, group_box.tl().y, group_box.br().y), decodedTxt);
 
     // imshow("grouping",src);
     // memory clean-up
@@ -204,7 +226,7 @@ vector<DecodedText> doOCR(string languageFile, string whitelist, Mat &image,vect
     t_r = (double)getTickCount();
     
     vector<DecodedText> decodedTxtRegions;
-    for (int i=0; i<(int)nm_boxes.size(); i++)
+    for (int i=0; i < 20 && i < (int)nm_boxes.size(); i++)
     {
         // rectangle(out_img_detection, nm_boxes[i].tl(), nm_boxes[i].br(), Scalar(0,255,255), 3);
         
@@ -225,37 +247,36 @@ vector<DecodedText> doOCR(string languageFile, string whitelist, Mat &image,vect
         string word = "";
         for(auto it = words.begin();it != words.end();it++)
             word += *it;
-        float confidence = 0;
+        float confidence = 1;
         for(auto it = confidences.begin();it != confidences.end();it++)
-            if(*it > confidence)
-                confidence = *it;
+            confidence *= *it / 100;
         
         output.erase(remove(output.begin(), output.end(), '\n'), output.end());
-        LOG << "OCR output = \"" << output << "\" length = " << output.size() << " confidence = " << confidence << endl;
+        cout << "OCR output = \"" << output << "\" length = " << output.size() << " confidence = " << confidence << endl;
         
         if(words.size() != 0)
             decodedTxtRegions.push_back(DecodedText(Box(nm_boxes[i].tl().x, nm_boxes[i].br().x, nm_boxes[i].tl().y, nm_boxes[i].br().y), word, confidence));
     }  
     return decodedTxtRegions;
 }
-vector<Rect> computeGroupsWithMinArea(Mat &src,vector<Mat> &channels,float minArea){
-    Regions region= computeRegionGroups(src,channels,minArea);
+vector<Rect> computeGroupsWithMinArea(String langaugeFile, Mat &src,vector<Mat> &channels,float minArea){
+    Regions region= computeRegionGroups(langaugeFile, src,channels,minArea);
     vector<Rect> groups_boxes=region.groups_boxes;
     if(groups_boxes.size()==0 && minArea-0.00075 > 0){
-        return computeGroupsWithMinArea(src,channels,minArea-0.00075);
+        return computeGroupsWithMinArea(langaugeFile, src,channels,minArea-0.00075);
     }
     else if(groups_boxes.size()==0 && minArea-0.00015 >0) {
-        return computeGroupsWithMinArea(src,channels,minArea-0.00075);
+        return computeGroupsWithMinArea(langaugeFile, src,channels,minArea-0.00075);
     }
     else{
         return groups_boxes;
     }
 }
-Regions computeRegionGroups(Mat &src,vector<Mat> &channels,float minArea){
+Regions computeRegionGroups(String languageFile, Mat &src,vector<Mat> &channels,float minArea){
     // Create ERFilter objects with the 1st and 2nd stage default classifiers
     //FIXME
-    Ptr<ERFilter> er_filter1 = createERFilterNM1(loadClassifierNM1("Resources/trained_classifierNM1.xml"),100,minArea,0.5f,0.8f,true,0.02f);
-    Ptr<ERFilter> er_filter2 = createERFilterNM2(loadClassifierNM2("Resources/trained_classifierNM2.xml"),0.01);
+    Ptr<ERFilter> er_filter1 = createERFilterNM1(loadClassifierNM1(languageFile + "/Resources/trained_classifierNM1.xml"),100,minArea,0.5f,0.8f,true,0.02f);
+    Ptr<ERFilter> er_filter2 = createERFilterNM2(loadClassifierNM2(languageFile + "/Resources/trained_classifierNM2.xml"),0.01);
     vector<vector<ERStat> > regions(channels.size());
     // Apply the default cascade classifier to each independent channel (could be done in parallel)
     for (int c=0; c<(int)channels.size(); c++)
