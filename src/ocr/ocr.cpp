@@ -93,18 +93,18 @@ void rotate_image_90n(Mat &src, Mat &dst, int angle)
 }
 
 OutputOCR* Ocr(char* buffer, unsigned int len, string languageFile, string whitelist, int x, int y, int width, int height, int rotate) {
-    cout << "Crop dimensions: " << x << " " << y << " " << width << " " << height << endl;
+    LOG << "Crop dimensions: " << x << " " << y << " " << width << " " << height << endl;
     Mat temp(1, len, CV_8UC3, buffer);
     Mat src = imdecode(temp, 1);
     if ( src.data == NULL )   
     {
-        cout << "Unable to load image." << endl;
+        LOG << "Unable to load image." << endl;
         return NULL;
     }
     // clone the image
     if(rotate < 0)
         rotate = 360 + rotate;
-    cout << "rotating image by " << rotate << endl;
+    LOG << "rotating image by " << rotate << endl;
     Mat clonesrc;
     Mat croppedImage = src(Rect(x, y, width, height));
     rotate_image_90n(croppedImage, clonesrc, rotate);
@@ -124,7 +124,7 @@ OutputOCR* Ocr(char* buffer, unsigned int len, string languageFile, string white
     Mat src = imdecode(temp, 1);
     if ( src.data == NULL )   
     {
-        cout << "Unable to load image." << endl;
+        LOG << "Unable to load image." << endl;
         return NULL;
     }
     return detectAndDecode(languageFile, whitelist, src);
@@ -139,7 +139,7 @@ OutputOCR* Ocr (string path, string languageFile, string whitelist) {
     f.open(path.c_str(), std::ios::binary);
     if(!f.is_open())  
     {
-        cout << "lol" << endl;
+        LOG << "lol" << endl;
     }  
     else  
     { 
@@ -157,12 +157,12 @@ OutputOCR* Ocr (string path, string languageFile, string whitelist) {
     Mat src = imdecode(temp, 1);
     if ( src.data == NULL )   
     {
-        cout << "Unable to decode image." << endl;
+        LOG << "Unable to decode image." << endl;
         return NULL;
     }
-    cout << src.type() << endl;
-    cout << CV_8UC3 << endl;
-    cout << "image loaded" << endl;
+    LOG << src.type() << endl;
+    LOG << CV_8UC3 << endl;
+    LOG << "image loaded" << endl;
     return detectAndDecode(languageFile, whitelist, src);
 }
 
@@ -188,7 +188,7 @@ OutputOCR* detectAndDecode(string languageFile, string whitelist, Mat &src){
     if(groups_boxes.size()==0){
         groups_boxes=computeGroupsWithMinArea(languageFile, src,channels,minArea);
     }
-    cout << "received boxes: " << groups_boxes.size() << endl;
+    LOG << "received boxes: " << groups_boxes.size() << endl;
     
     if(groups_boxes.size() == 0)
         return NULL;
@@ -252,7 +252,7 @@ vector<DecodedText> doOCR(string languageFile, string whitelist, Mat &image,vect
             confidence *= *it / 100;
         
         output.erase(remove(output.begin(), output.end(), '\n'), output.end());
-        cout << "OCR output = \"" << output << "\" length = " << output.size() << " confidence = " << confidence << endl;
+        LOG << "OCR output = \"" << output << "\" length = " << output.size() << " confidence = " << confidence << endl;
         
         if(words.size() != 0)
             decodedTxtRegions.push_back(DecodedText(Box(nm_boxes[i].tl().x, nm_boxes[i].br().x, nm_boxes[i].tl().y, nm_boxes[i].br().y), word, confidence));
