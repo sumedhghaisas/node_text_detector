@@ -21,7 +21,7 @@
     "bindings": "latest"
   },
   "scripts": {
-    "install": "npm install -g cmake-js@3.0.0 && node cmake_install.js",
+    "install": "node cmake_install.js",
     "test": "node example.js"
   },
   "readme": "# node_text_detector\r\nImage Text Detector written in C++(OpenCV with Tesseract) available as Node Addon.\r\n",

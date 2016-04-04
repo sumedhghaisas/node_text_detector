@@ -11,7 +11,20 @@ function onError(err) {
 
 function runCmakeJS(cmakeJSFile, cmakeFile, slash)
 {
-    const ls = child_process.spawn("cmd", ['/c', cmakeJSFile, '-c', __dirname + slash + 'cmake_binary' + slash + 'bin' + slash + cmakeFile, 'rebuild']);
+    var cmd;
+    var args;
+    
+    if(process.platform == 'win32')
+    {
+        cmd = 'cmd';
+        args = ['/c', '.\\node_modules\\.bin\\cmake-js.cmd', '-c', __dirname + '\\cmake_binary\\bin\\cmake.exe', 'rebuild'];
+    }
+    else
+    {
+        cmd = './node_modules/cmake-js/bin/cmake-js';
+        args = ['-c', __dirname + '/cmake_binary/bin/cmake', 'rebuild'];
+    }
+    const ls = child_process.spawn(cmd, args);
                      
     ls.on("exit", function(exitCode) {
         console.log('process exited with code ' + exitCode);
