@@ -5,6 +5,8 @@ var tar = require('tar');
 var child_process = require('child_process');
 var http = require('http');
 
+var cmake_prefix = "";
+
 function onError(err) {
     console.error('An error occurred:', err)
 }
@@ -19,11 +21,17 @@ function runCmakeJS(cmakeJSFile, cmakeFile, slash)
         cmd = 'cmd';
         args = ['/c', '.\\node_modules\\.bin\\cmake-js.cmd', '-c', __dirname + '\\cmake_binary\\bin\\cmake.exe', 'rebuild'];
     }
+    else if(process.platform == 'darwin')
+    {
+        cmd = './node_modules/cmake-js/bin/cmake-js';
+        args = ['-c', __dirname + cmake_prefix + '/cmake_binary/CMake.app/Contents/bin/cmake', 'rebuild'];
+    }
     else
     {
         cmd = './node_modules/cmake-js/bin/cmake-js';
-        args = ['-c', __dirname + '/cmake_binary/bin/cmake', 'rebuild'];
+        args = ['-c', __dirname + cmake_prefix + '/cmake_binary/bin/cmake', 'rebuild'];
     }
+    
     const ls = child_process.spawn(cmd, args);
                      
     ls.on("exit", function(exitCode) {
@@ -93,7 +101,7 @@ function downloadAndRun(filename, type, folder, url)
        if(process.platform != 'win32')
        {
            console.log("Downloading via wget...");
-           const ls = child_process.spawn('wget', ['https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz', '-O', 'cmake_binary.tar.gz', '--no-check-certificate']);
+           const ls = child_process.spawn('pwd', []);
            ls.stdout.on("data", function(chunk) {
         console.log('received stdout chunk ' + chunk);
     });
@@ -108,13 +116,17 @@ function downloadAndRun(filename, type, folder, url)
     });
 };
 
-
 var toDownload = false;        
 try
 {
     var stats = fs.lstatSync('./cmake_binary');
     if(!stats.isDirectory())
-        download = true;
+    {
+        var stats2 = fs.lstatSync('./../../cmake_binary');
+        if(!stats2.isDirectory())
+            download = true;
+        else cmake_prefix = "/../..";
+    }
 }
 catch(e)
 {
@@ -129,10 +141,12 @@ if (toDownload)
     {
         downloadAndRun('cmake_binary', 'zip', 'cmake-3.3.2-win32-x86', 'https://cmake.org/files/v3.3/cmake-3.3.2-win32-x86.zip');
     }
-    else
+    else if(process.platform == 'darwin')
     {
-        downloadAndRun('cmake_binary', 'tar.gz', 'cmake-3.3.2-Linux-x86_64', 'https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz');
+        downloadAndRun('cmake_binary', 'tar.gz', 'cmake-3.5.1-Darwin-x86_64.tar.gz', 'https://cmake.org/files/v3.5/cmake-3.5.1-Darwin-x86_64.tar.gz');
     }
+    else
+        downloadAndRun('cmake_binary', 'tar.gz', 'cmake-3.3.2-Linux-x86_64', 'https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz');
 }
 else 
 {
