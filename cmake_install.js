@@ -46,15 +46,10 @@ function runCmakeJS(cmakeJSFile, cmakeFile, slash)
 function downloadAndRun(filename, type, folder, url) 
 {
     var tmpFilePath = filename + "." + type;
-  
-    console.log(url);
-  
-    https.get(url, function(response) {
-        response.on('data', function (data) {
-            fs.appendFileSync(tmpFilePath, data)
-        });
 
-        response.on('end', function() {
+    console.log(url);
+
+    function afterDownload() {
             if(type == 'zip')
             {
                 var zip = new AdmZip(tmpFilePath);
@@ -66,20 +61,53 @@ function downloadAndRun(filename, type, folder, url)
             else if(type == "tar.gz")
             {
                 const ls = child_process.spawn('tar', ['-xzf', tmpFilePath]);
+
+                ls.stdout.on("data", function(chunk) {
+        console.log('received stdout chunk ' + chunk);
+    });
+
+    ls.stderr.on("data", function(chunk) {
+        console.log('received stderr chunk ' + chunk);
+    });
+
                 ls.stdout.on("end", function() {
                     fs.unlink(tmpFilePath);
                     fs.renameSync('./' + folder, './cmake_binary');
                     runCmakeJS('cmake-js', 'cmake', '/');
                 });
             }
-            else 
+            else
             {
                 console.error("Error: Invalid Type");
             }
+        }
+        
+    https.get(url, function(response) {
+        response.on('data', function (data) {
+            fs.appendFileSync(tmpFilePath, data)
         });
 
-    })
+        response.on('end', afterDownload);
+
+    }).on('error', function(e) {
+       if(process.platform != 'win32')
+       {
+           console.log("Downloading via wget...");
+           const ls = child_process.spawn('wget', ['https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz', '-O', 'cmake_binary.tar.gz', '--no-check-certificate']);
+           ls.stdout.on("data", function(chunk) {
+        console.log('received stdout chunk ' + chunk);
+    });
+
+    ls.stderr.on("data", function(chunk) {
+        console.log('received stderr chunk ' + chunk);
+    });
+
+           ls.stdout.on("end", afterDownload);
+       }
+       else console.log(e);
+    });
 };
+
 
 var toDownload = false;        
 try
