@@ -143,7 +143,7 @@ if (toDownload)
     }
     else if(process.platform == 'darwin')
     {
-        downloadAndRun('cmake_binary', 'tar.gz', 'cmake-3.5.1-Darwin-x86_64.tar.gz', 'https://cmake.org/files/v3.5/cmake-3.5.1-Darwin-x86_64.tar.gz');
+        downloadAndRun('cmake_binary', 'tar.gz', 'cmake-3.5.1-Darwin-x86_64', 'https://cmake.org/files/v3.5/cmake-3.5.1-Darwin-x86_64.tar.gz');
     }
     else
         downloadAndRun('cmake_binary', 'tar.gz', 'cmake-3.3.2-Linux-x86_64', 'https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz');
