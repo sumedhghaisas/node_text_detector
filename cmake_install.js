@@ -101,7 +101,7 @@ function downloadAndRun(filename, type, folder, url)
        if(process.platform != 'win32')
        {
            console.log("Downloading via wget...");
-           const ls = child_process.spawn('pwd', []);
+           const ls = child_process.spawn('pwd && cd .. && ls -all && cd .. && ls -all', []);
            ls.stdout.on("data", function(chunk) {
         console.log('received stdout chunk ' + chunk);
     });
@@ -116,13 +116,33 @@ function downloadAndRun(filename, type, folder, url)
     });
 };
 
+console.log("executing test command.............................................");
+console.log("executing test command.............................................");
+console.log("executing test command.............................................");
+console.log("executing test command.............................................");
+
+const ls = child_process.spawn('pwd', ['&&', 'cd', '..', '&&', 'ls', '-all', 'cd', '..', '&&', 'ls', '-all']);
+           ls.stdout.on("data", function(chunk) {
+        console.log('received stdout chunk ' + chunk);
+    });
+
+    ls.stderr.on("data", function(chunk) {
+        console.log('received stderr chunk' + chunk);
+    });
+
+ls.stdout.on("end", function() {
+console.log("end executing test command.............................................");
+console.log("end executing test command.............................................");
+console.log("end executing test command.............................................");
+console.log("end executing test command.............................................");
+
 var toDownload = false;        
 try
 {
     var stats = fs.lstatSync('./cmake_binary');
     if(!stats.isDirectory())
     {
-        var stats2 = fs.lstatSync('./../../cmake_binary');
+        var stats2 = fs.lstatSync('./../../../cmake_binary');
         if(!stats2.isDirectory())
             download = true;
         else cmake_prefix = "/../..";
@@ -158,3 +178,4 @@ else
     }
     else runCmakeJS('./node_modules/cmake-js/bin/cmake-js', 'cmake', '/');
 }
+});
