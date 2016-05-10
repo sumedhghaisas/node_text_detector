@@ -27,6 +27,20 @@ add_library(${PROJECT_NAME} SHARED ${srcs})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} tesseract::tesseract ${CMAKE_JS_LIB})
 
+set(new_srcs
+  src/new_ocr/sync.cpp
+  src/new_ocr/AvailableChar.cpp
+  src/new_ocr/AvailablePlate.cpp
+  src/new_ocr/begin.cpp
+  src/new_ocr/ExtractPlates.cpp
+  src/new_ocr/FindChars.cpp
+  src/new_ocr/Pre_process.cpp
+)
+
+add_library(new_ocr SHARED ${new_srcs})
+set_target_properties(new_ocr PROPERTIES PREFIX "" SUFFIX ".node")
+target_link_libraries(new_ocr ${OpenCV_LIBS} tesseract::tesseract ${CMAKE_JS_LIB})
+
 set(ClassifierFiles
     ${CMAKE_CURRENT_LIST_DIR}/Resources/trained_classifierNM1.xml
     ${CMAKE_CURRENT_LIST_DIR}/Resources/trained_classifierNM2.xml
