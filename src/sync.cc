@@ -49,7 +49,7 @@ NAN_METHOD(GetTextSync) {
    
     if(decodedText == NULL)
         info.GetReturnValue().Set(Nan::Undefined());
-    else info.GetReturnValue().Set(Nan::New(decodedText->ToLocal()));
+    else info.GetReturnValue().Set(decodedText->ToLocal());
     
     delete decodedText;
 }
@@ -87,7 +87,7 @@ NAN_METHOD(GetTextCropSync) {
    
     if(decodedText == NULL)
         info.GetReturnValue().Set(Nan::Undefined());
-    else info.GetReturnValue().Set(Nan::New(decodedText->ToLocal()));
+    else info.GetReturnValue().Set(decodedText->ToLocal());
     
     delete decodedText;
 }
